@@ -1,0 +1,24 @@
+{
+  "name": "tbexhangemoney",
+  "version": "1.0.0",
+  "description": "Telegram bot for exchange money",
+  "main": "index.js",
+  "scripts": {
+    "serve": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "telegramBot",
+    "echange money"
+  ],
+  "author": "Andrew Tolochkevych",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "esm": "^3.2.25",
+    "telegraf": "^4.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
