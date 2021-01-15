@@ -1,3 +1,2 @@
 Telegram bot for currency conversion, using framework telegraf
-
-@ExchangeMoneyPBot 
+https://t.me/@ExchangeMoneyPBot 
