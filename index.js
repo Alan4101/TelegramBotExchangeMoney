@@ -1,4 +1,4 @@
-const { Telegraf , Markup} = require('telegraf')
+const { Telegraf } = require('telegraf')
 
 const {getBaseVal, getMainMenu, getCurrentRate ,exchange, callbackQueryAction, getExchangeCurrency} = require('./helpers')
 
@@ -12,7 +12,7 @@ if (config.TELEGRAM_TOKEN === undefined) {
 const bot = new Telegraf(config.TELEGRAM_TOKEN)
 
 bot.start( ctx => {
-    ctx.reply(`Welcome, ${ctx.chat.first_name}!`)
+    ctx.reply(`Привіт, ${ctx.chat.first_name}! Для того щоб розпочати виберіть команду /nav`)
 })
 
 bot.command('nav', ctx => {
@@ -28,65 +28,40 @@ bot.on('callback_query', ctx =>{
     const action = ctx.update.callback_query.data
 
     callbackQueryAction(action, ctx) ?  base = action : convert = action
-    // if( callbackQueryAction(action, ctx)){
-    //     base = action
-    //
-    // }else {
-    //     convert = action
-    // }
 
-    // if (action === "UAH") {
-    //     base = action
-    //     ctx.reply(`Базова валюта: ${t},\n оберіть валюту для конвертації`, getExchangeCurrency(action))
-    // } else if (action === "USD") {
-    //     base = action
-    //
-    //     ctx.reply(`Базова валюта: ${t},\n оберіть валюту для конвертації` , getExchangeCurrency(action))
-    // } else if (action === "EUR") {
-    //     base = action
-    //
-    //     ctx.reply(`Базова валюта: ${t},\n оберіть валюту для конвертації`, getExchangeCurrency(action))
-    // }else if(action === 'toUAH'){
-    //     convert = action
-    //     ctx.reply('Введіть суму')
-    //
-    // }else if(action === 'toUSD'){
-    //     convert = action
-    //     ctx.reply('Введіть суму')
-    //
-    // }else if(action === 'toEUR'){
-    //     convert = action
-    //     ctx.reply('Введіть суму')
-    //
-    //
-    // }
     ctx.answerCbQuery(action)
 })
 
 bot.hears('Виберіть основну валюту', ctx =>{
-    ctx.reply("Перелік", getBaseVal())
+    ctx.replyWithHTML("<i>Перелік</i>", getBaseVal())
 })
-
+function logger(msg, val){
+    console.log(`${msg}`,val)
+}
 bot.on('text', ctx =>{
     let reg = /^\d+$/
 
     if(reg.test(ctx.message.text)){
         // console.log("67->text:", +ctx.message.text)
         getCurrentRate(base, convert)
-            .then(rate => {
-                console.log('rate:', rate)
+            .then( rate => {
+                const res = exchange(+ctx.message.text, rate, base, convert)
+                logger('index onText, res:', res)
 
-                const res = exchange(+ctx.message.text, +rate, base)
+                // ctx.reply(`Результат: ${res}`)
+                ctx.replyWithHTML(`
+                        <b>${base} --> ${convert.slice(2)}</b> \n<i>Результат:</i> <b>${parseFloat(res.toFixed(2))} ${convert.slice(2)} </b> 
+                    `)
 
-                ctx.reply(`Результат: ${parseFloat(res.toFixed(2))}`)
-
-            })
+            }).catch( err => {
+                console.log(err)
+            ctx.replyWithHTML(`<b><i>Упсс.. щось не так, спробуйте знову.</i></b>`, getBaseVal())
+        })
         // console.log('yes')
     }else {
-        console.log('no')
+        // console.log('no')
         ctx.reply('Введіть правильну суму')
     }
-    // console.log(ctx.message.text)
 })
 
 
