@@ -1,21 +1,31 @@
 const{ Markup } = require('telegraf')
 const axios = require('axios')
 
-let dataCurrency = null
+let dataCurrency
+/*отримання всіх валют*/
+(function (){
+    axios.get('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5').then( s =>{
+        dataCurrency = [...s.data]
+    })
+})()
 
-exports.getMainMenu = () => {
-    return Markup.keyboard([
-        [{ text: 'Виберіть основну валюту', callback_data: 'base_m' }],
-        [{ text: 'Clear', callback_data: 'clear_all' }]
-    ]).resize(true)
+// rate -> USD.sale , EUR.sale
+// rate -> usd.buy, eur.buy
+function USDorEURtoUAH(x, rate){
+    return x*rate
 }
-exports.getBaseVal = () =>{
-    return Markup.inlineKeyboard([
-        [{ text: '🇺🇦 UAH', callback_data: 'UAH' }],
-        [{ text: '🇺🇸 USD', callback_data: 'USD'}],
-        [{ text: '🇪🇺 EUR', callback_data: 'EUR'}],
-    ]).resize()
+// rate buy
+function USDtoEURorEURtoUSD(x,from, to ){
+    let f_rate = 0
+    let t_rate = 0
+    dataCurrency.map( i => {
+        if(i.ccy === to) t_rate = +i.buy
+        if(i.ccy === from) f_rate = +i.buy
+    })
+
+    return ((f_rate/t_rate)*x)-0.0500
 }
+
 // exports.getExchangeCurrency = val => {
 const getExchangeCurrency = val => {
     const arr = [
@@ -27,7 +37,21 @@ const getExchangeCurrency = val => {
 
     return Markup.inlineKeyboard(s)
 }
-
+/* клавіатури для видору валюти*/
+exports.getMainMenu = () => {
+    return Markup.keyboard([
+        [{ text: 'Виберіть основну валюту', callback_data: 'base_m' }]
+        // [{ text: 'Clear', callback_data: 'clear_all' }]
+    ]).resize(true)
+}
+exports.getBaseVal = () =>{
+    return Markup.inlineKeyboard([
+        [{ text: '🇺🇦 UAH', callback_data: 'UAH' }],
+        [{ text: '🇺🇸 USD', callback_data: 'USD'}],
+        [{ text: '🇪🇺 EUR', callback_data: 'EUR'}],
+    ]).resize()
+}
+/*обробник вибору валюти*/
 exports.callbackQueryAction = (action, context) => {
     const baseArrCurrency = ['UAH', 'USD', 'EUR']
     const convertArrCurrency = ['toUAH', 'toUSD', 'toEUR']
@@ -43,16 +67,8 @@ exports.callbackQueryAction = (action, context) => {
         }
     }
 }
-
-function logger(msg, val){
-    console.log(`${msg}`,val)
-}
-(function (){
-    axios.get('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5').then( s =>{
-        dataCurrency = [...s.data]
-    })
-})()
- exports.getCurrentRate =  async (base, convertC) => {
+/* для отримання поточного курсу вибраної валюти */
+exports.getCurrentRate =  async (base, convertC) => {
     let resultRate = 0
     try{
         const dataCurrencies = await axios.get('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5')
@@ -76,24 +92,7 @@ function logger(msg, val){
         throw new Error(error)
     }
 }
-
-// rate -> USD.sale , EUR.sale
-// rate -> usd.buy, eur.buy
-function USDorEURtoUAH(x, rate){
-    return x*rate
-}
-// rate buy
-function USDtoEURorEURtoUSD(x,from, to ){
-    let f_rate = 0
-    let t_rate = 0
-    dataCurrency.map( i => {
-        if(i.ccy === to) t_rate = +i.buy
-        if(i.ccy === from) f_rate = +i.buy
-    })
-
-    return ((f_rate/t_rate)*x)-0.0500
-}
-
+/* конвертація коштів*/
 exports.exchange = (input, rate, baseCurrency, c) =>{
     let con = c.slice(2)
     // console.log(baseCurrency, con )
