@@ -1,3 +1,4 @@
+const express = require('express')
 const { Telegraf } = require('telegraf')
 
 const {
@@ -7,7 +8,7 @@ const {
     exchange,
     callbackQueryAction
 } = require('./helpers')
-
+const app = express()
 const {config} = require('./config')
 
 
@@ -68,4 +69,7 @@ bot.launch()
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
 
+app.listen(config.PORT, ()=>{
+    console.log(`Server has been started in ${config.PORT} port`)
+})
 // приклад крутого бота https://habr.com/ru/post/483194/

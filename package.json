@@ -16,6 +16,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "esm": "^3.2.25",
+    "express": "^4.17.1",
     "telegraf": "^4.0.1"
   },
   "devDependencies": {
