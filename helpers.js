@@ -1,6 +1,7 @@
-const{ Markup } = require('telegraf')
-const axios = require('axios')
-
+// const{ Markup } = require('telegraf')
+import { Markup } from 'telegraf'
+// const axios = require('axios')
+import axios from "axios";
 let dataCurrency
 /*отримання всіх валют*/
 (function (){
@@ -38,13 +39,15 @@ const getExchangeCurrency = val => {
     return Markup.inlineKeyboard(s)
 }
 /* клавіатури для видору валюти*/
-exports.getMainMenu = () => {
+// exports.getMainMenu = () => {
+export const getMainMenu = () => {
     return Markup.keyboard([
         [{ text: 'Виберіть основну валюту', callback_data: 'base_m' }]
         // [{ text: 'Clear', callback_data: 'clear_all' }]
     ]).resize(true)
 }
-exports.getBaseVal = () =>{
+// exports.getBaseVal = () =>{
+export const getBaseVal = () =>{
     return Markup.inlineKeyboard([
         [{ text: '🇺🇦 UAH', callback_data: 'UAH' }],
         [{ text: '🇺🇸 USD', callback_data: 'USD'}],
@@ -52,7 +55,8 @@ exports.getBaseVal = () =>{
     ]).resize()
 }
 /*обробник вибору валюти*/
-exports.callbackQueryAction = (action, context) => {
+// exports.callbackQueryAction = (action, context) => {
+export const callbackQueryAction = (action, context) => {
     const baseArrCurrency = ['UAH', 'USD', 'EUR']
     const convertArrCurrency = ['toUAH', 'toUSD', 'toEUR']
 
@@ -68,7 +72,8 @@ exports.callbackQueryAction = (action, context) => {
     }
 }
 /* для отримання поточного курсу вибраної валюти */
-exports.getCurrentRate =  async (base, convertC) => {
+// exports.getCurrentRate =  async (base, convertC) => {
+export const getCurrentRate =  async (base, convertC) => {
     let resultRate = 0
     try{
         const dataCurrencies = await axios.get('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5')
@@ -93,7 +98,8 @@ exports.getCurrentRate =  async (base, convertC) => {
     }
 }
 /* конвертація коштів*/
-exports.exchange = (input, rate, baseCurrency, c) =>{
+// exports.exchange = (input, rate, baseCurrency, c) =>{
+export const exchange = (input, rate, baseCurrency, c) =>{
     let con = c.slice(2)
     // console.log(baseCurrency, con )
 

@@ -1,29 +1,30 @@
-const express = require('express')
-const { Telegraf } = require('telegraf')
+import express from 'express'
+const app = express()
 
-const {
+import { config } from './config.js'
+import { Telegraf } from "telegraf"
+
+import {
     getBaseVal,
     getMainMenu,
     getCurrentRate,
     exchange,
     callbackQueryAction
-} = require('./helpers')
-const app = express()
-const {config} = require('./config')
+} from './helpers.js'
 
 
 if (config.TELEGRAM_TOKEN === undefined) {
     throw new Error('BOT_TOKEN must be provided!')
 }
-
 const bot = new Telegraf(config.TELEGRAM_TOKEN)
 let base = ''
 let convert = ''
-// let input = 0
 bot.start( ctx => {
     ctx.reply(`Привіт, ${ctx.chat.first_name}! Для того щоб розпочати виберіть команду /nav`)
 })
-
+bot.command('scene', ctx => {
+    ctx.scene.enter('baseCurrency')
+})
 bot.command('nav', ctx => {
     ctx.reply('Navigation', getMainMenu())
 })
@@ -47,7 +48,7 @@ bot.on('text', ctx =>{
         getCurrentRate(base, convert)
             .then( rate => {
                 const res = exchange(+ctx.message.text, rate, base, convert)
-
+                // console.log(res)
                 ctx.replyWithHTML(`
                         <b>😎 ${base} --> ${convert.slice(2)}</b> \n<i>Результат:</i> <b>${parseFloat(res.toFixed(2))} ${convert.slice(2)} </b>
                         `)
